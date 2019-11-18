@@ -1,0 +1,47 @@
+version: '3.7'
+services:
+  adminer:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: mysql_db_1
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 'ccart'
+      MYSQL_DATABASE: tracker
+      MYSQL_USER: ccart
+      MYSQL_PASSWORD: ccart
+    ports:
+      - 3306:3306
+    # command: ["--innodb_flush_method=O_DSYNC", "--innodb_write_io_threads=64", "--innodb_read_io_threads=64"]
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2048M
+  grafana:
+    image: grafana/grafana
+    ports:
+      - '9000:3000'
+    environment:
+      GF_INSTALL_PLUGINS: percona-percona-app
+
+  prom_mysql_exporter:
+    image: prom/mysqld-exporter
+    ports:
+      - '9104:9104'
+    environment:
+      DATA_SOURCE_NAME: root:ccart@(mysql_db_1:3306)/tracker
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+    ports:
+      - 9090:9090
+
+   
+
+
